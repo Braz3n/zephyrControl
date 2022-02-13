@@ -60,11 +60,11 @@ Registers are addressed with the following addresses
 | AL            | 010           | 8-bit  |
 | AH            | 011           | 8-bit  |
 | B             | 10            | 16-bit |
-| BL            | 010           | 8-bit  |
-| BH            | 011           | 8-bit  |
+| BL            | 100           | 8-bit  |
+| BH            | 101           | 8-bit  |
 | C             | 11            | 16-bit |
-| CL            | 010           | 8-bit  |
-| CH            | 011           | 8-bit  |
+| CL            | 110           | 8-bit  |
+| CH            | 111           | 8-bit  |
 
 Any additional space in the 8-bit opcode after the instruction and registers
 are encoded are filled with zeros.
