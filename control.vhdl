@@ -11,7 +11,6 @@ entity controlUnit is
     port (
         rst             : in std_logic;
         clk             : in std_logic;
-        -- dataBus         : in std_logic_vector (regDataBusHalfWidth-1 downto 0);
 
         -- Register Signals
         regOpCode       : out std_logic_vector (regOpCodeWidth-1 downto 0);
@@ -22,27 +21,18 @@ entity controlUnit is
         aluOpCode : out std_logic_vector (aluOpCodeWidth-1 downto 0);
 
         -- Fetch Signals
-        instructionBus  : in std_logic_vector(fetchInstructionWidth-1 downto 0);
+        fetchInstructionBus  : in std_logic_vector(fetchInstructionWidth-1 downto 0);
         fetchOpCode : out std_logic_vector(fetchOpWidth-1 downto 0);
-        addrBusLock : out std_logic
+        fetchAddrBusLock : out std_logic
     );
 end controlUnit;
 
 architecture rtl of controlUnit is
-    type state_type is (fetch, load, execute);
-    signal stateMachine : state_type;
+    type state_type is (fetch, load, execute, increment);
+    signal stateMachine : state_type := fetch;
 
     signal nextState : std_logic;
 begin
-
-    instructionDecodeProcess : process (stateMachine) is
-    begin
-        if state = load then
-
-        end if;
-    end process;
-
-
     stateDecodeProcess : process (stateMachine) is
     begin
         case stateMachine is
@@ -55,111 +45,111 @@ begin
                 regAddrBus <= regPC_slv;
                 -- Read out address onto instruction bus
                 fetchOpCode <= fetchLDI;
-                addrBusLock <= '1'
+                fetchAddrBusLock <= '1';
                 -- Move to the next state
                 nextState <= '1';
 
             -- LOAD STATE --    
             when load =>
-                if instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpLDxY then
+                if fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpLDxY then
                     -- First put the target 16-bit register onto the address bus
                     regOpCode <= regWideOut;
-                    regAddrBus <= instructionBus(1 downto 0);
+                    regAddrBus <= fetchInstructionBus(1 downto 0);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing other than latch the address bus
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '1';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpSTxY then
+                    fetchAddrBusLock <= '1';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpSTxY then
                     -- First put the target 16-bit register onto the address bus
                     regOpCode <= regWideOut;
-                    regAddrBus <= instructionBus(1 downto 0);
+                    regAddrBus <= fetchInstructionBus(1 downto 0);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing other than latch the address bus
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '1';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpJMPX then
+                    fetchAddrBusLock <= '1';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpJMPX then
                     -- Copy the target register to the PC register
                     regOpCode <= regCpyToPC;
-                    regAddrBus <= instuctionBus(fetchInstructionWidth-controlDualOperandOpCodeWidth-1 downto 0);
+                    regAddrBus <= fetchInstructionBus(fetchInstructionWidth-controlDualOperandOpCodeWidth-1 downto 0);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpCJMPX then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpCJMPX then
                     -- If the Zero Flag is set, copy the target register to the PC register
                     if aluFlagBus(zeroFlagIndex) = '1' then
                         regOpCode <= regCpyToPC;
                     else
                         regOpCode <= regNOP;
                     end if;
-                    regAddrBus <= instuctionBus(fetchInstructionWidth-controlDualOperandOpCodeWidth-1 downto 0);
+                    regAddrBus <= fetchInstructionBus(fetchInstructionWidth-controlDualOperandOpCodeWidth-1 downto 0);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVxQ then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVxQ then
                     -- Load target register to data bus, selecting the correct 8-bit register
-                    if instructionBus(0) = 1 then
+                    if fetchInstructionBus(0) = '1' then
                         regOpCode <= regHalfOutH;
                     else
                         regOpCode <= regHalfOutL;
                     end if;
-                    regAddrBus <= instructionBus(2 downto 1);
+                    regAddrBus <= fetchInstructionBus(2 downto 1);
                     -- ALU stores data bus to accumulator register
                     aluOpCode <= aluLDA;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVQx then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVQx then
                     -- Save data bus value to target register, selecting the correct 8-bit register
-                    if instructionBus(0) = 1 then
+                    if fetchInstructionBus(0) = '1' then
                         regOpCode <= regHalfInH;
                     else
                         regOpCode <= regHalfInL;
                     end if;
-                    regAddrBus <= instructionBus(2 downto 1);
+                    regAddrBus <= fetchInstructionBus(2 downto 1);
                     -- ALU reads out accumulator register onto the data bus
                     aluOpCode <= aluRDA;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVFx then                
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpMVFx then                
                     -- Save data bus value to target register, selecting the correct 8-bit register
-                    if instructionBus(0) = 1 then
+                    if fetchInstructionBus(0) = '1' then
                         regOpCode <= regHalfInH;
                     else
                         regOpCode <= regHalfInL;
                     end if;
-                    regAddrBus <= instructionBus(2 downto 1);
+                    regAddrBus <= fetchInstructionBus(2 downto 1);
                     -- ALU reads out accumulator register onto the data bus
                     aluOpCode <= aluRDF;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpADDx or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpSUBx or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpANDx or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpXORx or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpORx  then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpADDx or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpSUBx or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpANDx or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpXORx or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpORx  then
                     -- Load target register to data bus, selecting the correct 8-bit register
-                    if instructionBus(0) = 1 then
+                    if fetchInstructionBus(0) = '1' then
                         regOpCode <= regHalfOutH;
                     else
                         regOpCode <= regHalfOutL;
                     end if;
-                    regAddrBus <= instructionBus(2 downto 1);
+                    regAddrBus <= fetchInstructionBus(2 downto 1);
                     -- ALU stores data bus to accumulator temporary register
                     aluOpCode <= aluLDT;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpNOTQ or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpINCQ or
-                      instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpDECQ then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpNOTQ or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpINCQ or
+                      fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpDECQ then
                 else  -- This covers the NOP, NOTQ, INCQ, and DECQ cases.
                     -- Registers do nothing
                     regOpCode <= regNOP;
@@ -168,40 +158,38 @@ begin
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
+                    fetchAddrBusLock <= '0';
                 end if;
 
             -- EXECUTE STATE --
             when execute =>
-                if instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpLDxY then
+                if fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpLDxY then
                     -- Store the data bus into target 8-bit register
-                    regOpCode <= regHalfIn;
-                    if instructionBus(2) = 1 then
+                    if fetchInstructionBus(2) = '1' then
                         regOpCode <= regHalfOutH;
                     else
                         regOpCode <= regHalfOutL;
                     end if;
-                    regAddrBus <= instructionBus(4 downto 3);
+                    regAddrBus <= fetchInstructionBus(4 downto 3);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit loads byte from memory to the data bus
                     fetchOpCode <= fetchLDD;
-                    addrBusLock <= '1';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpSTxY then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDualOperandOpCodeWidth) = cpuOpSTxY then
                     -- Register puts the byte of memory to be saved onto the data bus
-                    regOpCode <= regHalfOut;
-                    if instructionBus(2) = 1 then
+                    if fetchInstructionBus(2) = '1' then
                         regOpCode <= regHalfOutH;
                     else
                         regOpCode <= regHalfOutL;
                     end if;
-                    regAddrBus <= instructionBus(4 downto 3);
+                    regAddrBus <= fetchInstructionBus(4 downto 3);
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing other than latch the address bus
                     fetchOpCode <= fetchSTD;
-                    addrBusLock <= '1';                   
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpADDx then
+                    fetchAddrBusLock <= '0';                   
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpADDx then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -209,8 +197,8 @@ begin
                     aluOpCode <= aluADD;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpSUBx then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpSUBx then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -218,8 +206,8 @@ begin
                     aluOpCode <= aluSUB;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpANDx then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpANDx then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -227,8 +215,8 @@ begin
                     aluOpCode <= aluAND;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpXORx then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpXORx then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -236,21 +224,21 @@ begin
                     aluOpCode <= aluXOR;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpORx  then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlSingOperandOpCodeWidth) = cpuOpORx  then
                     -- Load target register to data bus, selecting the correct 8-bit register
-                    if instructionBus(0) = 1 then
+                    if fetchInstructionBus(0) = '1' then
                         regOpCode <= regHalfOutH;
                     else
                         regOpCode <= regHalfOutL;
                     end if;
-                    regAddrBus <= instructionBus(2 downto 1);
+                    regAddrBus <= fetchInstructionBus(2 downto 1);
                     -- ALU stores data bus to accumulator temporary register
                     aluOpCode <= aluOR;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpNOTQ then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpNOTQ then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -258,8 +246,8 @@ begin
                     aluOpCode <= aluNOT;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpINCQ then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpINCQ then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -267,8 +255,8 @@ begin
                     aluOpCode <= aluINC;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
-                elsif instuctionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpDECQ then
+                    fetchAddrBusLock <= '0';
+                elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlZeroOperandOpCodeWidth) = cpuOpDECQ then
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
@@ -276,7 +264,7 @@ begin
                     aluOpCode <= aluDEC;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
+                    fetchAddrBusLock <= '0';
                 else  -- This covers the NOP, JMPX, CJMPX, MVxQ, MVQx, and MVFx cases.
                     -- Registers do nothing
                     regOpCode <= regNOP;
@@ -285,8 +273,17 @@ begin
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing
                     fetchOpCode <= fetchNOP;
-                    addrBusLock <= '0';
+                    fetchAddrBusLock <= '0';
                 end if;
+            when increment =>
+                -- Registers do nothing
+                regOpCode <= regIncPC;
+                regAddrBus <= (others => '0');
+                -- ALU does nothing
+                aluOpCode <= aluNOP;
+                -- Fetch Unit does nothing
+                fetchOpCode <= fetchNOP;
+                fetchAddrBusLock <= '0';
         end case;
     end process;
 
@@ -294,7 +291,7 @@ begin
     begin
         if rst then
             stateMachine <= fetch;
-        elsif rising_edge(clk) then:
+        elsif rising_edge(clk) then
             case stateMachine is
                 when fetch =>
                     if nextState <= '1' then
@@ -305,6 +302,10 @@ begin
                         stateMachine <= execute;
                     end if;
                 when execute =>
+                    if nextState <= '1' then
+                        stateMachine <= increment;
+                    end if;
+                when increment =>
                     if nextState <= '1' then
                         stateMachine <= fetch;
                     end if;
