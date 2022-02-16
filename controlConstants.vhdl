@@ -18,7 +18,7 @@ package controlConstants is
     -- Arithmetic/Boolean Logic
     constant cpuOpMVxQ  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "00100";  -- Move to Accumulator - Copy 8-bit register to accumulator register
     constant cpuOpMVQx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "00101";  -- Move from Accumulator - Copy accumulator register to 8-bit register
-    constant cpuOpMVFx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "00101";  -- Move from Accumulator Flags - Copy flag register to 8-bit register
+    constant cpuOpMVFx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "01110";  -- Move from Accumulator Flags - Copy flag register to 8-bit register
     constant cpuOpADDx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "00110";  -- Add register x to Accumulator
     constant cpuOpSUBx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "00111";  -- Subtract register x from Accumulator
     constant cpuOpANDx  : std_logic_vector(controlSingOperandOpCodeWidth-1 downto 0) := "01000";  -- Bitwise AND register x with accumulator
