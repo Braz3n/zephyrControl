@@ -39,8 +39,8 @@ The following table describes the opcodes, and the layout of the binary encoding
 | `JMPX`   | 16-bit register  |                   | `0001 0-XX`     | Jump to address stored in register X                                      |
 | `CJMPX`  | 16-bit register  |                   | `0001 1-XX`     | Conditional jump to address stored in register X if ALU zero flag is set  |
 | `MVxQ`   | 8-bit register   |                   | `0010 0xxx`     | Move value in register x to Q                                             |
-| `MVQx`   | 8-bit register   |                   | `0010 0xxx`     | Move value in Q to register x                                             |
-| `MVFx`   | 8-bit register   |                   | `0010 0xxx`     | Move value in F to x                                                      |
+| `MVQx`   | 8-bit register   |                   | `0010 1xxx`     | Move value in Q to register x                                             |
+| `MVFx`   | 8-bit register   |                   | `0111 0xxx`     | Move value in F to x                                                      |
 | `ADDx`   | 8-bit register   |                   | `0011 0xxx`     | Unsigned addition of register x to Q                                      |
 | `SUBx`   | 8-bit register   |                   | `0011 1xxx`     | Unsigned subtraction of register x to Q                                   |    
 | `ANDx`   | 8-bit register   |                   | `0100 0xxx`     | Bitwise AND of register x and Q                                           |
