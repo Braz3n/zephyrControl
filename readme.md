@@ -40,8 +40,8 @@ The following table describes the opcodes, and the layout of the binary encoding
 | `JPCC X` | 16-bit register  |                   | `0001 01XX`     | Conditional jump to address stored in register X if carry flag is clear  |
 | `JPSV X` | 16-bit register  |                   | `0001 10XX`     | Conditional jump to address stored in register X if overlow flag is set  |
 | `JPCV X` | 16-bit register  |                   | `0001 11XX`     | Conditional jump to address stored in register X if overflow flag is clear  |
-| `JPSS X` | 16-bit register  |                   | `0010 00XX`     | Conditional jump to address stored in register X if signed flag is set  |
-| `JPCS X` | 16-bit register  |                   | `0010 01XX`     | Conditional jump to address stored in register X if signed flag is clear  |
+| `JPSN X` | 16-bit register  |                   | `0010 00XX`     | Conditional jump to address stored in register X if negative flag is set  |
+| `JPCN X` | 16-bit register  |                   | `0010 01XX`     | Conditional jump to address stored in register X if negative flag is clear  |
 | `JPSZ X` | 16-bit register  |                   | `0010 10XX`     | Conditional jump to address stored in register X if zero flag is set  |
 | `JPCZ X` | 16-bit register  |                   | `0010 11XX`     | Conditional jump to address stored in register X if zero flag is clear  |
 | `WRQ x`  | 8-bit register   |                   | `0111 0xxx`     | Write value in register x to Q                                             |
@@ -65,8 +65,8 @@ The following table describes the opcodes, and the layout of the binary encoding
 | `CLRC`   |                  |                   | `0000 0011`     | Clear carry flag |
 | `SETV`   |                  |                   | `0000 0100`     | Set overflow flag |
 | `CLRV`   |                  |                   | `0000 0101`     | Clear overflow flag |
-| `SETS`   |                  |                   | `0000 0110`     | Set signed flag |
-| `CLRS`   |                  |                   | `0000 0111`     | Set signed flag |
+| `SETN`   |                  |                   | `0000 0110`     | Set signed flag |
+| `CLRN`   |                  |                   | `0000 0111`     | Set signed flag |
 
 Registers are addressed with the following addresses
 | Register Name | Address (Bin) | Width  |     
