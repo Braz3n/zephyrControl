@@ -21,8 +21,8 @@ package controlConstants is
     constant cpuOpJPCC  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "000101";    -- Jump if clear (carry flag) - Jump to address (16-bit register)
     constant cpuOpJPSV  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "000110";    -- Jump if set (overflow flag) - Jump to address (16-bit register)
     constant cpuOpJPCV  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "000111";    -- Jump if clear (overflow flag) - Jump to address (16-bit register)
-    constant cpuOpJPCN  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001000";    -- Jump if set (negative flag) - Jump to address (16-bit register)
-    constant cpuOpJPSN  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001001";    -- Jump if clear (negative flag) - Jump to address (16-bit register)
+    constant cpuOpJPSN  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001000";    -- Jump if set (negative flag) - Jump to address (16-bit register)
+    constant cpuOpJPCN  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001001";    -- Jump if clear (negative flag) - Jump to address (16-bit register)
     constant cpuOpJPSZ  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001010";    -- Jump if set (zero flag) - Jump to address (16-bit register)
     constant cpuOpJPCZ  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "001011";    -- Jump if clear (zero flag) - Jump to address (16-bit register)
     -- ALU Read/Write
@@ -41,11 +41,11 @@ package controlConstants is
     constant cpuOpINCQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100110";  -- Increment accumulator
     constant cpuOpDECQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100111";  -- Decrement accumulator
     -- ALU Shifts/Rotations
-    constant cpuOpLSLQ  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "01100000";  -- Logical shift left accumulator
-    constant cpuOpLSRQ  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "01100001";  -- Logical shift right accumulator
-    constant cpuOpASRQ  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "01100010";  -- Arithmetic shift right accumulator
-    constant cpuOpRLCQ  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "01100011";  -- Rotate accumulator left through carry
-    constant cpuOpRRCQ  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "01100100";  -- Rotate accumulator right through carry
+    constant cpuOpLSLQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100000";  -- Logical shift left accumulator
+    constant cpuOpLSRQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100001";  -- Logical shift right accumulator
+    constant cpuOpASRQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100010";  -- Arithmetic shift right accumulator
+    constant cpuOpRLCQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100011";  -- Rotate accumulator left through carry
+    constant cpuOpRRCQ  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "01100100";  -- Rotate accumulator right through carry
     -- ALU Flags
     constant cpuOpSETC  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "00000010";  -- Set carry flag
     constant cpuOpCLRC  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "00000011";  -- Clear carry flag

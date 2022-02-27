@@ -66,8 +66,8 @@ The following table describes the opcodes, and the layout of the binary encoding
 | `CLRC`   |                  |                   | `0000 0011`     | Clear carry flag                                                              |
 | `SETV`   |                  |                   | `0000 0100`     | Set overflow flag                                                             |
 | `CLRV`   |                  |                   | `0000 0101`     | Clear overflow flag                                                           |
-| `SETN`   |                  |                   | `0000 0110`     | Set signed flag                                                               |
-| `CLRN`   |                  |                   | `0000 0111`     | Set signed flag                                                               |
+| `SETN`   |                  |                   | `0000 0110`     | Set negative flag                                                             |
+| `CLRN`   |                  |                   | `0000 0111`     | Clear negative flag                                                           |
 
 Registers are addressed with the following addresses
 | Register Name | Address (Bin) | Width  |     
