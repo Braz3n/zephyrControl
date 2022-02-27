@@ -1,5 +1,7 @@
 # Zephyr Control Unit
 
+This is the control unit for the Zephyr CPU project, a simple 8-bit CPU architecture.
+
 ## Register Naming Schema
 There are four 16-bit general-purpose registers, which are accessible as 8-bit values on the data bus.
 The are named as followed:
@@ -10,15 +12,9 @@ The are named as followed:
 
 The upper or lower byte in a register is indicated by appending either H (high byte) or L (low byte).
 
-In addition to these registers, the MV instruction can reference the two 8-bit accumulator registers:
- - Q - Accumulator (Read and Write)
- - F - Accumulator flags (Read-Only)
+In addition to these registers, the WRQ and RDQ instructions can reference the 8-bit accumulator register, Q.
 
 ## Opcode Breakdown
-Most OpCodes are 5-bits long, with the remaining space occupied by register
-addresses. The two exceptions to this at present are LDxY and STxY, which 
-are only 3-bits long so as to allow space to address the necessary registers.
-
 When discussing instructions, x/X and y/Y are used as placeholders for the first and second 
 operand respectively. Lowercase is used for an 8-bit register, and uppercase is used for a 16-bit register.
 
@@ -85,5 +81,25 @@ Registers are addressed with the following addresses
 | CL            | 110           | 8-bit  |
 | CH            | 111           | 8-bit  |
 
-Any additional space in the 8-bit opcode after the instruction and registers
-are encoded are filled with zeros.
+
+Below is a map of the 8-bit ISA space, where each row represents the first half of the instruction, and each column represents the second half of the instruction.
+For example, NOP is 0x00, and ADC AL is 0x3A.
+
+|    |    x0      |     x1     |     x2     |     x3    |     x4    |     x5    |     x6    |     x7    |     x8     |      x9    |     xA    |      xB   |     xC    |    xD     |     xE    |    xF     |
+|----|------------|------------|------------|-----------|-----------|-----------|-----------|-----------|------------|------------|-----------|-----------|-----------|-----------|-----------|-----------|
+| 0x | NOP        | HALT       | SETC       | CLRC      | SETV      | CLRV      | SETN      | CLRN      | LDL PCL    | LDL PCH    | LDL AL    | LDL AH    | LDL BL    | LDL BH    | LDL CL    | LDL CH    |
+| 1x | JPSC PC    | JPSC A     | JPSC B     | JPSC C    | JPCC PC   | JPCC A    | JPCC B    | JPCC C    | JPSV PC    | JPSV A     | JPSV B    | JPSV C    | JPCZ PC   | JPCZ A    | JPCZ B    | JPCZ C    |
+| 2x | JPSN PC    | JPSN A     | JPSN B     | JPSN C    | JPCN PC   | JPCN A    | JPCN B    | JPCN C    | JPSZ PC    | JPSZ A     | JPSN B    | JPSN C    | JPCN PC   | JPCN A    | JPCN B    | JPCN C    |
+| 3x | ADD PCL    | ADD PCH    | ADD AL     | ADD AH    | ADD BL    | ADD BH    | ADD CL    | ADD CH    | ADC PCL    | ADC PCH    | ADC AL    | ADC AH    | ADC BL    | ADC BH    | ADC CL    | ADC CH    |
+| 4x | SUB PCL    | SUB PCH    | SUB AL     | SUB AH    | SUB BL    | SUB BH    | SUB CL    | SUB CH    | SBB PCL    | SBB PCH    | SBB AL    | SBB AH    | SBB BL    | SBB BH    | SBB CL    | SBB CH    |
+| 5x | AND PCL    | AND PCH    | AND AL     | AND AH    | AND BL    | AND BH    | AND CL    | AND CH    | OR PCL     | OR PCH     | OR AL     | OR AH     | OR BL     | OR BH     | OR CL     | OR CH     |
+| 6x | LSLQ       | LSRQ       | ASRQ       | RLCQ      | RRCQ      | NOTQ      |INCQ       | DECQ      | XOR PCL    | XOR PCH    | XOR AL    | XOR AH    | XOR BL    | XOR BH    | XOR CL    | XOR CH    |  
+| 7x | WRQ PCL    | WRQ PCH    | WRQ AL     | WRQ AH    | WRQ BL    | WRQ BH    | WRQ CL    | WRQ CH    | RDQ PCL    | RDQ PCH    | RDQ AL    | RDQ AH    | RDQ BL    | RDQ BH    | RDQ CL    | RDQ CH    |
+| 8x | MV PCL PCL | MV PCL PCH | MV PCL AL  | MV PCL AH | MV PCL BL | MV PCL BH | MV PCL CL | MV PCL CH | MV PCH PCL | MV PCH PCH | MV PCH AL | MV PCH AH | MV PCH BL | MV PCH BH | MV PCH CL | MV PCH CH |
+| 9x | MV AL PCL  | MV AL PCH  | MV AL AL   | MV AL AH  | MV AL BL  | MV AL BH  | MV AL CL  | MV AL CH  | MV AH PCL  | MV AH PCH  | MV AH AL  | MV AH AH  | MV AH BL  | MV AH BH  | MV AH CL  | MV AH CH  |
+| Ax | MV BL PCL  | MV BL PCH  | MV BL AL   | MV BL AH  | MV BL BL  | MV BL BH  | MV BL CL  | MV BL CH  | MV BH PCL  | MV BH PCH  | MV BH AL  | MV BH AH  | MV BH BL  | MV BH BH  | MV BH CL  | MV BH CH  |
+| Bx | MV CL PCL  | MV CL PCH  | MV CL AL   | MV CL AH  | MV CL BL  | MV CL BH  | MV CL CL  | MV CL CH  | MV CH PCL  | MV CH PCH  | MV CH AL  | MV CH AH  | MV CH BL  | MV CH BH  | MV CH CL  | MV CH CH  |
+| Cx | LD PCL PC  | LD PCL A   | LD PCL B   | LD PCL C  | LD PCH PC | LD PCH A  | LD PCH B  | LD PCH C  | LD AL PC   | LD AL A    | LD AL B   | LD AL C   | LD AH PC  | LD AH A   | LD AH B   | LD AH C   |
+| Dx | LD BL PC   | LD BL A    | LD BL B    | LD BL C   | LD BH PC  | LD BH A   | LD BH B   | LD BH C   | LD CL PC   | LD CL A    | LD CL B   | LD CL C   | LD CH PC  | LD CH A   | LD CH B   | LD CH C   |
+| Ex | ST PCL PC  | ST PCL A   | ST PCL B   | ST PCL C  | ST PCH PC | ST PCH A  | ST PCH B  | ST PCH C  | ST AL PC   | ST AL A    | ST AL B   | ST AL C   | ST AH PC  | ST AH A   | ST AH B   | ST AH C   |
+| Fx | ST BL PC   | ST BL A    | ST BL B    | ST BL C   | ST BH PC  | ST BH A   | ST BH B   | ST BH C   | ST CL PC   | ST CL A    | ST CL B   | ST CL C   | ST CH PC  | ST CH A   | ST CH B   | ST CH C   |
