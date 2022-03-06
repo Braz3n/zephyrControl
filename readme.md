@@ -88,8 +88,8 @@ For example, NOP is 0x00, and ADC AL is 0x3A.
 |    |    x0      |     x1     |     x2     |     x3    |     x4    |     x5    |     x6    |     x7    |     x8     |      x9    |     xA    |      xB   |     xC    |    xD     |     xE    |    xF     |
 |----|------------|------------|------------|-----------|-----------|-----------|-----------|-----------|------------|------------|-----------|-----------|-----------|-----------|-----------|-----------|
 | 0x | NOP        | HALT       | SETC       | CLRC      | SETV      | CLRV      | SETN      | CLRN      | LDL PCL    | LDL PCH    | LDL AL    | LDL AH    | LDL BL    | LDL BH    | LDL CL    | LDL CH    |
-| 1x | JPSC PC    | JPSC A     | JPSC B     | JPSC C    | JPCC PC   | JPCC A    | JPCC B    | JPCC C    | JPSV PC    | JPSV A     | JPSV B    | JPSV C    | JPCZ PC   | JPCZ A    | JPCZ B    | JPCZ C    |
-| 2x | JPSN PC    | JPSN A     | JPSN B     | JPSN C    | JPCN PC   | JPCN A    | JPCN B    | JPCN C    | JPSZ PC    | JPSZ A     | JPSN B    | JPSN C    | JPCN PC   | JPCN A    | JPCN B    | JPCN C    |
+| 1x | JPSC PC    | JPSC A     | JPSC B     | JPSC C    | JPCC PC   | JPCC A    | JPCC B    | JPCC C    | JPSV PC    | JPSV A     | JPSV B    | JPSV C    | JPCV PC   | JPCV A    | JPCV B    | JPCV C    |
+| 2x | JPSN PC    | JPSN A     | JPSN B     | JPSN C    | JPCN PC   | JPCN A    | JPCN B    | JPCN C    | JPSZ PC    | JPSZ A     | JPSZ B    | JPSZ C    | JPCZ PC   | JPCZ A    | JPCZ B    | JPCZ C    |
 | 3x | ADD PCL    | ADD PCH    | ADD AL     | ADD AH    | ADD BL    | ADD BH    | ADD CL    | ADD CH    | ADC PCL    | ADC PCH    | ADC AL    | ADC AH    | ADC BL    | ADC BH    | ADC CL    | ADC CH    |
 | 4x | SUB PCL    | SUB PCH    | SUB AL     | SUB AH    | SUB BL    | SUB BH    | SUB CL    | SUB CH    | SBB PCL    | SBB PCH    | SBB AL    | SBB AH    | SBB BL    | SBB BH    | SBB CL    | SBB CH    |
 | 5x | AND PCL    | AND PCH    | AND AL     | AND AH    | AND BL    | AND BH    | AND CL    | AND CH    | OR PCL     | OR PCH     | OR AL     | OR AH     | OR BL     | OR BH     | OR CL     | OR CH     |
