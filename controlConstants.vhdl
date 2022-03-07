@@ -13,7 +13,7 @@ package controlConstants is
     constant cpuOpHALT  : std_logic_vector(controlZeroOperandOpCodeWidth-1 downto 0) := "00000001";  -- Halt CPU - Do nothing until reset
     -- Loading/Storing Data to Memory
     constant cpuOpMVxy  : std_logic_vector(controlMoveOperandOpCodeWidth-1 downto 0) := "10";        -- Move data between registers - Copy 8-bit register to another 8-bit register 
-    constant cpuOpLDLx  : std_logic_vector(controlAddrOperandOpCodeWidth-1 downto 0) := "000010";    -- Load Literal - Load literal to 8-bit register
+    constant cpuOpLDLx  : std_logic_vector(controlDataOperandOpCodeWidth-1 downto 0) := "00001";     -- Load Literal - Load literal to 8-bit register
     constant cpuOpLDxY  : std_logic_vector(controlLdStOperandOpCodeWidth-1 downto 0) := "110";       -- Load from address - Load from address (16-bit register) to 8-bit register
     constant cpuOpSTxY  : std_logic_vector(controlLdStOperandOpCodeWidth-1 downto 0) := "111";       -- Store to address - Store from 8-bit register to address (16-bit register)
     -- Jump
