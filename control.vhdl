@@ -50,7 +50,7 @@ begin
         end if;
     end process;
 
-    stateDecodeProcess : process (clk) is
+    stateDecodeProcess : process (clk, stateMachine, fetchInstructionBus) is
     begin
 --        if rising_edge(clk) then
             case stateMachine is
@@ -63,7 +63,7 @@ begin
                     -- Put program counter onto address bus and increment PC for the next instruction
                     regOpCode <= regWideOut;
                     regAddrBus <= regPC_slv;
-                    regIncPC <= '0';
+                    regIncPC <= '1';
                     -- Read out address onto instruction bus
                     fetchOpCode <= fetchLDI;
                     fetchAddrBusLock <= '1';
@@ -74,7 +74,7 @@ begin
                     -- Put program counter onto address bus
                     regOpCode <= regWideOut;
                     regAddrBus <= regPC_slv;
-                    regIncPC <= '1';
+                    regIncPC <= '0';
                     -- Read out address onto instruction bus
                     fetchOpCode <= fetchLDI;
                     fetchAddrBusLock <= '1';
@@ -97,11 +97,11 @@ begin
                         -- Read out the next byte in memory and increment PC for the next instruction.
                         regOpCode <= regWideOut;
                         regAddrBus <= regPC_slv;
-                        regIncPC <= '0';
+                        regIncPC <= '1';
                         -- ALU does nothing
                         aluOpCode <= aluNOP;
                         -- Fetch Unit does nothing other than latch the address bus
-                        fetchOpCode <= fetchNOP;
+                        fetchOpCode <= fetchLDD;
                         fetchAddrBusLock <= '1';
                     elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlLdStOperandOpCodeWidth) = cpuOpSTxY then
                         -- First put the target 16-bit register onto the address bus
@@ -328,11 +328,11 @@ begin
                         -- Read out the next byte in memory.
                         regOpCode <= regWideOut;
                         regAddrBus <= regPC_slv;
-                        regIncPC <= '1';
+                        regIncPC <= '0';
                         -- ALU does nothing
                         aluOpCode <= aluNOP;
                         -- Fetch Unit does nothing other than latch the address bus
-                        fetchOpCode <= fetchNOP;
+                        fetchOpCode <= fetchLDD;
                         fetchAddrBusLock <= '1';
                     elsif fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlLdStOperandOpCodeWidth) = cpuOpSTxY then
                         -- First put the target 16-bit register onto the address bus
@@ -788,11 +788,14 @@ begin
                     fetchOpCode <= fetchNOP;
                     fetchAddrBusLock <= '0';
                     
+                ----------
+                -- Init --
+                ---------- 
                 when others =>
                     -- Registers do nothing
                     regOpCode <= regNOP;
                     regAddrBus <= (others => '0');
-                    regIncPC <= '1';
+                    regIncPC <= '0';
                     -- ALU does nothing
                     aluOpCode <= aluNOP;
                     -- Fetch Unit does nothing
@@ -815,7 +818,9 @@ begin
                 when fetch =>
                     stateMachine <= load;
                 when load =>
-                    if fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDataOperandOpCodeWidth) = cpuOpLDLx then
+                    if fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlDataOperandOpCodeWidth) = cpuOpLDLx or
+                        fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlLdStOperandOpCodeWidth) = cpuOpLDxY or
+                        fetchInstructionBus(fetchInstructionWidth-1 downto fetchInstructionWidth-controlLdStOperandOpCodeWidth) = cpuOpSTxY then
                         stateMachine <= postload;
                     else
                         stateMachine <= execute;
